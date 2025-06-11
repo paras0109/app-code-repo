@@ -19,7 +19,7 @@ steps:
         git config --global user.email "ci@build.com"
         git config --global user.name "cloud-build"
         git clone https://github.com/paras0109/helm-deploy-repo.git
-        cd helm-deploy-repo/frontend
+        cd helm-deploy-repo
         sed -i "s/tag: .*/tag: \"$SHORT_SHA\"/" values.yaml
         git commit -am "Update image tag to $SHORT_SHA"
         git push https://$(cat /secrets/github-token)@github.com/paras0109/helm-deploy-repo.git HEAD:main
