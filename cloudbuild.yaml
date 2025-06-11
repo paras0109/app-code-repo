@@ -1,34 +1,27 @@
 steps:
+  # Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'build'
-      - '-t'
-      - 'us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:$SHORT_SHA'
-      - '.'
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:$SHORT_SHA', '.']
 
+  # Push Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'push'
-      - 'us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:$SHORT_SHA'
+    args: ['push', 'us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:$SHORT_SHA']
 
+  # Clone helm repo and update tag in values.yaml
   - name: 'gcr.io/cloud-builders/git'
-    entrypoint: 'bash'
+    entrypoint: bash
     args:
-      - '-c'
+      - -c
       - |
-        git config --global user.email "ci@build.com"
+        GITHUB_TOKEN=$(gcloud secrets versions access latest --secret=github-token)
+        git config --global user.email "ci@cloudbuild.gcp"
         git config --global user.name "cloud-build"
-        git clone https://github.com/paras0109/helm-deploy-repo.git
+        git clone https://paras0109:${GITHUB_TOKEN}@github.com/paras0109/helm-deploy-repo.git
         cd helm-deploy-repo
         sed -i "s/tag: .*/tag: \"$SHORT_SHA\"/" values.yaml
-        git commit -am "Update image tag to $SHORT_SHA"
-        git push https://$(cat /secrets/github-token)@github.com/paras0109/helm-deploy-repo.git HEAD:main
-    secretEnv: ['GITHUB_TOKEN']
-
-secrets:
-- kmsKeyName: projects/free-trail-458302/locations/global/keyRings/my-keyring/cryptoKeys/my-key  # optional if you're using CMEK
-  secretEnv:
-    GITHUB_TOKEN: projects/free-trail-458302/secrets/github-token/versions/latest
+        git add values.yaml
+        git commit -m "Update image tag to $SHORT_SHA"
+        git push origin main
 
 images:
-  - 'us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:$SHORT_SHA'
+  - us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:$SHORT_SHA
