@@ -25,3 +25,7 @@ steps:
 
 images:
   - us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:$SHORT_SHA
+
+# ✅ Fix build failure by setting logging to Cloud Logging only
+options:
+  logging: CLOUD_LOGGING_ONLY
