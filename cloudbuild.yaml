@@ -3,7 +3,7 @@ substitutions:
 
 availableSecrets:
   secretManager:
-    - versionName: projects/free-trail-458302/secrets/github-token/versions/latest
+    - versionName: projects/free-trail-458302/secrets/github-token/versions/2
       env: GITHUB_TOKEN
 
 steps:
