@@ -1,31 +1,35 @@
+substitutions:
+  _IMAGE_TAG: $SHORT_SHA
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/free-trail-458302/secrets/github-token/versions/latest
+      env: GITHUB_TOKEN
+
 steps:
-  # Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:$SHORT_SHA', '.']
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:${_IMAGE_TAG}', '.']
 
-  # Push Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:$SHORT_SHA']
+    args: ['push', 'us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:${_IMAGE_TAG}']
 
-  # Clone helm repo and update tag in values.yaml
   - name: 'gcr.io/cloud-builders/git'
-    entrypoint: bash
+    entrypoint: 'bash'
+    secretEnv: ['GITHUB_TOKEN']
     args:
       - -c
       - |
-        GITHUB_TOKEN=$(gcloud secrets versions access latest --secret=github-token)
         git config --global user.email "paras.n0109@gmail.com"
         git config --global user.name "paras0109"
         git clone https://paras0109:${GITHUB_TOKEN}@github.com/paras0109/helm-deploy-repo.git
         cd helm-deploy-repo
-        sed -i "s/tag: .*/tag: \"$SHORT_SHA\"/" values.yaml
+        sed -i "s/tag: .*/tag: \"${_IMAGE_TAG}\"/" values.yaml
         git add values.yaml
-        git commit -m "Update image tag to $SHORT_SHA"
+        git commit -m "Update image tag to ${_IMAGE_TAG}"
         git push origin main
 
 images:
-  - us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:$SHORT_SHA
+  - us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:${_IMAGE_TAG}
 
-# ✅ Fix build failure by setting logging to Cloud Logging only
 options:
   logging: CLOUD_LOGGING_ONLY
