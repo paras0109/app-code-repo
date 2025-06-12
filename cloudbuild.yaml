@@ -1,6 +1,3 @@
-substitutions:
-  _IMAGE_TAG: $SHORT_SHA
-
 availableSecrets:
   secretManager:
     - versionName: projects/free-trail-458302/secrets/github-token/versions/latest
@@ -8,10 +5,10 @@ availableSecrets:
 
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:${_IMAGE_TAG}', '.']
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:$SHORT_SHA', '.']
 
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:${_IMAGE_TAG}']
+    args: ['push', 'us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:$SHORT_SHA']
 
   - name: 'gcr.io/cloud-builders/git'
     entrypoint: 'bash'
@@ -23,13 +20,13 @@ steps:
         git config --global user.name "paras0109"
         git clone https://paras0109:${GITHUB_TOKEN}@github.com/paras0109/helm-deploy-repo.git
         cd helm-deploy-repo
-        sed -i "s/tag: .*/tag: \"${_IMAGE_TAG}\"/" values.yaml
+        sed -i "s/tag: .*/tag: \"$SHORT_SHA\"/" values.yaml
         git add values.yaml
-        git commit -m "Update image tag to ${_IMAGE_TAG}"
+        git commit -m "Update image tag to $SHORT_SHA"
         git push origin main
 
 images:
-  - us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:${_IMAGE_TAG}
+  - us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:$SHORT_SHA
 
 options:
   logging: CLOUD_LOGGING_ONLY
