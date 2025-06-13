@@ -1,46 +1,15 @@
-substitutions:
-  _IMAGE_TAG: $SHORT_SHA
+options:
+  logging: CLOUD_LOGGING_ONLY
+  substitutionOption: ALLOW_LOOSE
+  machineType: E2_SMALL
 
-availableSecrets:
-  secretManager:
-    - versionName: projects/free-trail-458302/secrets/github-token/versions/4
-      env: GITHUB_TOKEN
+serviceAccount: ci-cd-service-account@free-trail-458302.iam.gserviceaccount.com
 
 steps:
-  # Step 1: Build Docker image
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - build
-      - -t
-      - 'us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:${_IMAGE_TAG}'
-      - .
-
-  # Step 2: Push Docker image
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - push
-      - 'us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:${_IMAGE_TAG}'
-
-  # Step 3: Update image tag in Helm repo and push
-  - name: 'gcr.io/cloud-builders/git'
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
     entrypoint: bash
-    secretEnv: ['GITHUB_TOKEN']
     args:
       - -c
       - |
-        git config --global user.email "paras.n0109@gmail.com"
-        git config --global user.name "paras0109"
-        git clone https://paras0109:$GITHUB_TOKEN@github.com/paras0109/helm-deploy-repo.git
-        cd helm-deploy-repo
-        sed -i "s/tag: .*/tag: \"${_IMAGE_TAG}\"/" values.yaml
-        git add values.yaml
-        git commit -m "Update image tag to ${_IMAGE_TAG}"
-        git push origin main
-
-# Output image location
-images:
-  - 'us-central1-docker.pkg.dev/free-trail-458302/new-test/frontend:${_IMAGE_TAG}'
-
-# Enable Cloud Logging
-options:
-  logging: CLOUD_LOGGING_ONLY
+        echo "Fetching secret..."
+        gcloud secrets versions access latest --secret=github-token
