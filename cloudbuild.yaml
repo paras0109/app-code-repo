@@ -5,4 +5,5 @@ steps:
       - -c
       - |
         GITHUB_TOKEN=$(gcloud secrets versions access latest --secret=github-token)
-        echo "Fetched GitHub token"
+        echo "Fetched GitHub token
+        
