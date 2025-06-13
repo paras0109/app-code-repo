@@ -1,15 +1,8 @@
-options:
-  logging: CLOUD_LOGGING_ONLY
-  substitutionOption: ALLOW_LOOSE
-  machineType: E2_SMALL
-
-serviceAccount: ci-cd-service-account@free-trail-458302.iam.gserviceaccount.com
-
 steps:
   - name: gcr.io/google.com/cloudsdktool/cloud-sdk
     entrypoint: bash
     args:
       - -c
       - |
-        echo "Fetching secret..."
-        gcloud secrets versions access latest --secret=projects/550707377888/secrets/github-token/4
+        GITHUB_TOKEN=$(gcloud secrets versions access latest --secret=github-token)
+        echo "Fetched GitHub token"
