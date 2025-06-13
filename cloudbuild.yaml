@@ -12,4 +12,4 @@ steps:
       - -c
       - |
         echo "Fetching secret..."
-        gcloud secrets versions access latest --secret=github-token
+        gcloud secrets versions access latest --secret=projects/550707377888/secrets/github-token/4
